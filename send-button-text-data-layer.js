@@ -1,12 +1,11 @@
-function pushToDataLayer(requestName, requestCategory = null) {
+function pushToDataLayer(eventType, eventName, eventCategory) {
   window.dataLayer = window.dataLayer || [];
   const eventData = {
-    event: 'requestNameCaptured',
-    requestName: requestName
+    event: "eventNameCaptured",
+    eventType: eventType,
+    eventName: eventName,
+    eventCategory: eventCategory
   };
-  if (requestCategory) {
-    eventData.requestCategory = requestCategory;
-  }
   dataLayer.push(eventData);
   console.log('✅ dataLayer push:', eventData);
 }
@@ -22,47 +21,67 @@ function findClosestMixAndCategory(button) {
   }
 
   const heading = current.querySelector('.item-name.heading');
-  if (!heading) {
-    console.warn('⚠️ .item-name.heading not found in .mix container');
-    return null;
-  }
-
-  return heading.textContent.trim();
+  return heading?.textContent.trim() || null;
 }
 
 function bindButtonLogic() {
   const path = window.location.pathname;
 
-  if (path === '/resources/marketing-resources-landing-page.html') {
-    document.querySelectorAll('.item-button').forEach(function (button) {
-      if (button.dataset.bound === "true") return;
-      button.dataset.bound = "true";
-
-      button.addEventListener('click', function () {
-        const itemRight = button.closest('.item-right');
-        const itemName = itemRight?.querySelector('.item-name')?.textContent.trim();
-        if (itemName) pushToDataLayer(itemName);
-      });
-    });
-
-  } else if (path === '/marketing-requests.html') {
+  if (path === '/marketing-requests.html') {
     document.querySelectorAll('.item-button-new').forEach(function (button) {
       if (button.dataset.bound === "true") return;
       button.dataset.bound = "true";
 
       button.addEventListener('click', function () {
         const itemRight = button.closest('.item-right');
-        const requestName = itemRight?.querySelector('.item-name')?.textContent.trim();
+        const eventName = itemRight?.querySelector('.item-name')?.textContent.trim();
+        const eventCategory = findClosestMixAndCategory(button);
+        if (eventName) {
+          pushToDataLayer('Marketing Request', eventName, eventCategory);
+        }
+      });
+    });
 
-        const requestCategory = findClosestMixAndCategory(button);
+  } else if (path === '/resources/marketing-resources-landing-page.html') {
+    // Case A: Regular item-button logic
+    document.querySelectorAll('.item-button').forEach(function (button) {
+      if (button.classList.contains('dont-see')) return; // Skip special ones here
+      if (button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
 
-        if (requestName) {
-          pushToDataLayer(requestName, requestCategory || null);
+      button.addEventListener('click', function () {
+        const itemRight = button.closest('.item-right');
+        const itemNameText = itemRight?.querySelector('.item-name')?.textContent.trim();
+        const buttonText = button?.textContent.trim();
+
+        if (!itemNameText || !buttonText) return;
+
+        let eventName, eventCategory;
+        if (buttonText.toLowerCase() === 'click here') {
+          eventName = itemNameText;
+          eventCategory = itemNameText;
+        } else {
+          eventCategory = itemNameText;
+          eventName = buttonText;
+        }
+
+        pushToDataLayer('Resource', eventName, eventCategory);
+      });
+    });
+
+    // Case B: "Don't See" buttons
+    document.querySelectorAll('.item-button.dont-see.w-button').forEach(function (button) {
+      if (button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
+
+      button.addEventListener('click', function () {
+        const buttonText = button?.textContent.trim();
+        if (buttonText) {
+          pushToDataLayer('Resource', buttonText, "Don't See What You're Looking For?");
         }
       });
     });
   }
 }
 
-// Safe fallback binding
 setTimeout(bindButtonLogic, 500);
