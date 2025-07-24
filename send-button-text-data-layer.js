@@ -32,33 +32,31 @@ function bindButtonLogic() {
       if (button.dataset.bound === "true") return;
       button.dataset.bound = "true";
 
-      button.addEventListener('click', function (e) {
-        const thisButton = e.currentTarget;
-        const itemRight = thisButton.closest('.item-right');
+      button.addEventListener('click', function () {
+        const itemRight = button.closest('.item-right');
         const eventName = itemRight?.querySelector('.item-name')?.textContent.trim();
-        const eventCategory = findClosestMixAndCategory(thisButton);
+        const eventCategory = findClosestMixAndCategory(button);
         if (eventName) {
-          pushToDataLayer('marketing request', eventName, eventCategory);
+          pushToDataLayer('Marketing Request', eventName, eventCategory);
         }
       });
     });
 
   } else if (path === '/resources/marketing-resources-landing-page.html') {
-    // Case A: regular .item-button (not .dont-see)
-    document.querySelectorAll('.item-button:not(.dont-see)').forEach(function (button) {
+    // Case A: Regular item-button logic
+    document.querySelectorAll('.item-button').forEach(function (button) {
+      if (button.classList.contains('dont-see')) return; // Skip special ones here
       if (button.dataset.bound === "true") return;
       button.dataset.bound = "true";
 
-      button.addEventListener('click', function (e) {
-        const thisButton = e.currentTarget;
-        const itemRight = thisButton.closest('.item-right');
+      button.addEventListener('click', function () {
+        const itemRight = button.closest('.item-right');
         const itemNameText = itemRight?.querySelector('.item-name')?.textContent.trim();
-        const buttonText = thisButton?.textContent.trim();
+        const buttonText = button?.textContent.trim();
 
         if (!itemNameText || !buttonText) return;
 
         let eventName, eventCategory;
-
         if (buttonText.toLowerCase() === 'click here') {
           eventName = itemNameText;
           eventCategory = itemNameText;
@@ -67,21 +65,19 @@ function bindButtonLogic() {
           eventName = buttonText;
         }
 
-        pushToDataLayer('resource', eventName, eventCategory);
+        pushToDataLayer('Resource', eventName, eventCategory);
       });
     });
 
-    // Case B: .item-button.dont-see.w-button
+    // Case B: "Don't See" buttons
     document.querySelectorAll('.item-button.dont-see.w-button').forEach(function (button) {
       if (button.dataset.bound === "true") return;
       button.dataset.bound = "true";
 
-      button.addEventListener('click', function (e) {
-        const thisButton = e.currentTarget;
-        const buttonText = thisButton?.textContent.trim();
-
+      button.addEventListener('click', function () {
+        const buttonText = button?.textContent.trim();
         if (buttonText) {
-          pushToDataLayer('resource', buttonText, "Don't See What You're Looking For?");
+          pushToDataLayer('Resource', buttonText, "Don't See What You're Looking For?");
         }
       });
     });
