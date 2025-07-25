@@ -27,7 +27,9 @@ function findClosestMixAndCategory(button) {
 function bindButtonLogic() {
   const path = window.location.pathname;
 
+  // ✅ Case: Marketing Requests Page
   if (path === '/marketing-requests.html') {
+    // Regular buttons
     document.querySelectorAll('.item-button-new').forEach(function (button) {
       if (button.dataset.bound === "true") return;
       button.dataset.bound = "true";
@@ -42,6 +44,20 @@ function bindButtonLogic() {
       });
     });
 
+    // Case B: "Don't See" buttons on marketing-requests.html
+    document.querySelectorAll('.item-button.dont-see.w-button').forEach(function (button) {
+      if (button.dataset.bound === "true") return;
+      button.dataset.bound = "true";
+
+      button.addEventListener('click', function () {
+        const buttonText = button?.textContent.trim();
+        if (buttonText) {
+          pushToDataLayer('Marketing Request', buttonText, "Don't See What You're Looking For?");
+        }
+      });
+    });
+
+  // ✅ Case: Marketing Resources Landing Page
   } else if (path === '/resources/marketing-resources-landing-page.html') {
     // Case A: Regular item-button logic
     document.querySelectorAll('.item-button').forEach(function (button) {
@@ -69,7 +85,7 @@ function bindButtonLogic() {
       });
     });
 
-    // Case B: "Don't See" buttons
+    // Case B: "Don't See" buttons on landing page
     document.querySelectorAll('.item-button.dont-see.w-button').forEach(function (button) {
       if (button.dataset.bound === "true") return;
       button.dataset.bound = "true";
